@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "concurrently \"node dist/server.js\" \"node dist/worker.js\"",
     "dev:server": "ts-node src/server.ts",
     "dev:worker": "ts-node src/worker.ts",
     "start:prod-server": "node dist/server.js",
@@ -15,6 +15,7 @@
     "@aws-sdk/client-s3": "^3.637.0",
     "axios": "^1.5.0",
     "bullmq": "^1.90.0",
+    "concurrently": "^8.2.2",
     "dotenv": "^16.0.0",
     "express": "^5.1.0",
     "form-data": "^4.0.0",

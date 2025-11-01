@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: sadahire-cv-microservice
+    runtime: node
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        sync: false
+      - key: UPLOAD_STORAGE_TYPE
+        value: local
+      - key: LOCAL_UPLOAD_PATH
+        value: uploads
+      - key: WORKER_DELAY_MS
+        value: "10000"
+      - key: FLASK_PARSER_URL
+        sync: false
+      - key: MAIN_SERVER_URL
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_BUCKET_NAME
+        sync: false
+
