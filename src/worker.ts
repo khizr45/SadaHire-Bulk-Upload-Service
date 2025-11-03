@@ -253,6 +253,9 @@ worker.on("completed", async (job) => {
   
   // Check if batch is complete and send report
   await checkAndSendReport(batchId);
+  
+  // Remove job from Redis to free up memory
+  await job.remove();
 });
 
 worker.on("failed", async (job, err) => {
@@ -280,12 +283,36 @@ worker.on("failed", async (job, err) => {
   if (batchId) {
     await checkAndSendReport(batchId);
   }
+  
+  // Remove failed job from Redis after max retries to free up memory
+  if (job && job.attemptsMade >= (job.opts.attempts || 3)) {
+    await job.remove();
+  }
 });
+
+// Periodic cleanup of old completed and failed jobs
+const cleanupInterval = setInterval(async () => {
+  try {
+    const { Queue } = await import("bullmq");
+    const cleanQueue = new Queue("cv-processing", { connection });
+    
+    // Clean completed jobs older than 1 hour
+    await cleanQueue.clean(3600 * 1000, 100, "completed");
+    
+    // Clean failed jobs older than 24 hours
+    await cleanQueue.clean(24 * 3600 * 1000, 200, "failed");
+    
+    console.log("🧹 Redis cleanup completed");
+  } catch (err) {
+    console.error("Cleanup error:", err);
+  }
+}, 30 * 60 * 1000); // Run every 30 minutes
 
 const shutdown = async () => {
   console.log("Worker shutting down...");
   console.log("\n🏁 Final Upload Statistics:");
   logStats();
+  clearInterval(cleanupInterval);
   await worker.close();
   process.exit(0);
 };
