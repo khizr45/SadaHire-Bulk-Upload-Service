@@ -6,11 +6,18 @@ import fs from "fs";
 import dotenv from "dotenv";
 import { cvQueue } from "./queue";
 import { uploadFileToS3 } from "./s3";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 
 const UPLOAD_TYPE = process.env.UPLOAD_STORAGE_TYPE || "local";
 const LOCAL_UPLOAD_PATH = process.env.LOCAL_UPLOAD_PATH || "uploads";
